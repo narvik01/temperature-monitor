@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature Monitor</title>
+    <style>
+        .table-container {
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .latest {
+            background-color: #e6ffe6;
+        }
+        .cold {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Temperature History</h1>
+    <div id="temperature-history"></div>
+
+    <script>
+        function fetchTemperatures() {
+            fetch('http://localhost:3000/history')
+                .then(response => response.json())
+                .then(data => {
+                    const groupedData = {};
+                    data.forEach(record => {
+                        if (!groupedData[record.location]) {
+                            groupedData[record.location] = [];
+                        }
+                        groupedData[record.location].push(record);
+                    });
+
+                    let html = '';
+                    
+                    Object.entries(groupedData).forEach(([location, records]) => {
+                        html += `
+                            <div class="table-container">
+                                <h2>Location: ${location}</h2>
+                                <table>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Temperature</th>
+                                    </tr>
+                        `;
+                        
+                        records.forEach((record, index) => {
+                            const rowClass = index === 0 ? 'latest' : '';
+                            const tempClass = parseFloat(record.temperature) < 0 ? 'cold' : '';
+                            html += `
+                                <tr class="${rowClass}">
+                                    <td>${new Date(record.timestamp).toLocaleString()}</td>
+                                    <td class="${tempClass}">${record.temperature}°C</td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += '</table></div>';
+                    });
+                    
+                    document.getElementById('temperature-history').innerHTML = html;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch data immediately and then every 30 seconds
+        fetchTemperatures();
+        setInterval(fetchTemperatures, 30000);
+    </script>
+</body>
+</html> 
