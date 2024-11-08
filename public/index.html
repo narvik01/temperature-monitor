@@ -4,40 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Temperature Monitor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <style>
-        .table-container {
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+        }
+        .location-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 30px;
+            overflow: hidden;
+            height: 100%;
         }
-        h2 {
-            color: #333;
-            margin-top: 30px;
+        .location-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+        .location-header h2 {
+            margin: 0;
+            color: #212529;
+            font-size: 1.5rem;
         }
-        th, td {
-            padding: 8px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
+        .table {
+            margin-bottom: 0;
         }
         .latest {
-            background-color: #e6ffe6;
+            background-color: rgba(25, 135, 84, 0.1);
         }
         .cold {
-            color: red;
+            color: #dc3545;
             font-weight: bold;
+        }
+        .temperature-cell {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        .timestamp-cell {
+            color: #6c757d;
+        }
+        .refresh-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 15px;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Temperature History</h1>
-    <div id="temperature-history"></div>
+    <div class="container">
+        <div class="page-header">
+            <h1 class="display-4">Temperature Monitor</h1>
+            <p class="refresh-info">Data refreshes automatically every 30 seconds</p>
+        </div>
+        <div id="temperature-history" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4"></div>
+    </div>
 
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function fetchTemperatures() {
             fetch('http://localhost:3000/history')
@@ -55,32 +94,62 @@
                     
                     Object.entries(groupedData).forEach(([location, records]) => {
                         html += `
-                            <div class="table-container">
-                                <h2>Location: ${location}</h2>
-                                <table>
-                                    <tr>
-                                        <th>Timestamp</th>
-                                        <th>Temperature</th>
-                                    </tr>
+                            <div class="col">
+                                <div class="location-card">
+                                    <div class="location-header">
+                                        <h2>
+                                            <i class="bi bi-thermometer-half"></i>
+                                            ${location}
+                                        </h2>
+                                    </div>
+                                    <div class="table-container">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Timestamp</th>
+                                                        <th scope="col">Temperature</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
                         `;
                         
-                        records.forEach((record, index) => {
-                            const rowClass = index === 0 ? 'latest' : '';
+                        records.forEach((record) => {
+                            const isLatest = record.row_num === 1;
                             const tempClass = parseFloat(record.temperature) < 0 ? 'cold' : '';
                             html += `
-                                <tr class="${rowClass}">
-                                    <td>${new Date(record.timestamp).toLocaleString()}</td>
-                                    <td class="${tempClass}">${record.temperature}°C</td>
+                                <tr class="${isLatest ? 'latest' : ''}">
+                                    <td class="timestamp-cell">
+                                        ${new Date(record.timestamp).toLocaleString()}
+                                    </td>
+                                    <td class="temperature-cell ${tempClass}">
+                                        ${record.temperature}°C
+                                    </td>
                                 </tr>
                             `;
                         });
                         
-                        html += '</table></div>';
+                        html += `
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
                     });
                     
-                    document.getElementById('temperature-history').innerHTML = html;
+                    document.getElementById('temperature-history').innerHTML = 
+                        html || '<div class="alert alert-info">No temperature data available</div>';
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('temperature-history').innerHTML = `
+                        <div class="alert alert-danger">
+                            Error loading temperature data. Please try again later.
+                        </div>
+                    `;
+                });
         }
 
         // Fetch data immediately and then every 30 seconds

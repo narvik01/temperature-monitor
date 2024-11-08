@@ -75,13 +75,17 @@ app.get('/temperature/:location', (req, res) => {
 // GET endpoint to retrieve temperature history
 app.get('/history', (req, res) => {
     db.all(`
-        SELECT 
-            location, 
-            ROUND(temperature, 2) as temperature, 
-            timestamp,
-            ROW_NUMBER() OVER (PARTITION BY location ORDER BY timestamp DESC) as row_num
-        FROM temperatures
-        ORDER BY timestamp DESC
+        WITH RankedTemperatures AS (
+            SELECT 
+                location, 
+                ROUND(temperature, 2) as temperature, 
+                timestamp,
+                ROW_NUMBER() OVER (PARTITION BY location ORDER BY timestamp DESC) as row_num
+            FROM temperatures
+        )
+        SELECT *
+        FROM RankedTemperatures
+        ORDER BY location, row_num
     `, [], (err, rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
