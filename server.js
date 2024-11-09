@@ -10,7 +10,11 @@ const port = 3000;
 // Configure Morgan for logging
 morgan.token('temperature', (req) => {
     if (req.path.startsWith('/temperature')) {
-        return `location: ${req.params.location}, temp: ${req.query.temp}`;
+        if (req.method === 'GET') {
+            return `location: ${req.params.location}, temp: ${req.query.temp}`;
+        } else if (req.method === 'POST') {
+            return `temp: ${req.query.temp}, body: ${JSON.stringify(req.body)}`;
+        }
     }
     return '';
 });
@@ -39,6 +43,30 @@ function isValidLocation(location) {
     const locationRegex = /^[a-zA-Z0-9-_]{2,50}$/;
     return locationRegex.test(location);
 }
+
+// New POST endpoint that just logs and responds OK
+app.post('/temperature', (req, res) => {
+    const temperature = req.query.temp;
+    
+    // Validate temperature
+    if (!temperature) {
+        return res.status(400).json({ 
+            error: 'Temperature query parameter (temp) is required' 
+        });
+    }
+
+    if (!isValidTemperature(temperature)) {
+        return res.status(400).json({ 
+            error: 'Invalid temperature value. Must be a number between -100°C and 100°C' 
+        });
+    }
+
+    res.json({ 
+        success: true, 
+        message: 'Temperature logged',
+        temperature: parseFloat(temperature)
+    });
+});
 
 // GET endpoint to record temperature
 app.get('/temperature/:location', (req, res) => {
