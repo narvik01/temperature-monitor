@@ -94,6 +94,12 @@
             text-align: center;
         }
 
+        /* Hide the Actions header */
+        .actions-header {
+            color: transparent;
+            border-bottom: 1px solid #dee2e6;  /* Keep the border line */
+        }
+
         /* Show delete button on row hover */
         .table tbody tr:hover .delete-btn {
             opacity: 1;
@@ -176,7 +182,7 @@
                                                     <tr>
                                                         <th scope="col">Timestamp</th>
                                                         <th scope="col">Temperature</th>
-                                                        <th scope="col" class="actions-cell">Actions</th>
+                                                        <th scope="col" class="actions-cell actions-header">.</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
