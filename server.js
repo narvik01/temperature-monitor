@@ -13,7 +13,7 @@ morgan.token('temperature', (req) => {
         if (req.method === 'GET') {
             return `location: ${req.params.location}, temp: ${req.query.temp}`;
         } else if (req.method === 'POST') {
-            return `temp: ${req.query.temp}, body: ${JSON.stringify(req.body)}`;
+            return `temp: ${req.query.temp}, body: ${req.body}`;
         }
     }
     return '';
@@ -49,31 +49,11 @@ app.post('/temperature/:location', (req, res) => {
     const location = req.params.location;
     const temperature = req.query.temp;
     
-    // Validate location
-    if (!isValidLocation(location)) {
-        return res.status(400).json({ 
-            error: 'Invalid location format. Use only letters, numbers, dashes, and underscores (2-50 characters).' 
-        });
-    }
-
-    // Validate temperature
-    if (!temperature) {
-        return res.status(400).json({ 
-            error: 'Temperature query parameter (temp) is required' 
-        });
-    }
-
-    if (!isValidTemperature(temperature)) {
-        return res.status(400).json({ 
-            error: 'Invalid temperature value. Must be a number between -100°C and 100°C' 
-        });
-    }
-
     res.json({ 
         success: true, 
         message: 'Temperature logged',
         location,
-        temperature: parseFloat(temperature)
+        temperature
     });
 });
 
