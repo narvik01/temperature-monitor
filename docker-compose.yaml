@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  app:
+  temperature-monitor:
     build: .
     image: strangeloop.cz/temperature-monitor
     container_name: temperature-monitor
