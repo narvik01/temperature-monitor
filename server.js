@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const morgan = require('morgan');
+const bodyParser = require('body-parser')
 const db = require('./database');
 
 const app = express();
@@ -45,7 +46,7 @@ function isValidLocation(location) {
 }
 
 // POST endpoint that logs and responds OK
-app.post('/temperature/:location', (req, res) => {
+app.post('/temperature/:location', bodyParser.text({type: '*/*'}), (req, res) => {
     const location = req.params.location;
     const temperature = req.query.temp;
     
