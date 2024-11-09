@@ -77,6 +77,7 @@ app.get('/history', (req, res) => {
     db.all(`
         WITH RankedTemperatures AS (
             SELECT 
+                id,
                 location, 
                 ROUND(temperature, 2) as temperature, 
                 timestamp,
@@ -92,6 +93,23 @@ app.get('/history', (req, res) => {
         }
         res.json(rows);
     });
+});
+
+// DELETE endpoint to remove a temperature record
+app.delete('/temperature/:id', (req, res) => {
+    const id = req.params.id;
+    
+    const stmt = db.prepare('DELETE FROM temperatures WHERE id = ?');
+    stmt.run(id, (err) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ 
+            success: true, 
+            message: 'Temperature record deleted' 
+        });
+    });
+    stmt.finalize();
 });
 
 app.listen(port, () => {
