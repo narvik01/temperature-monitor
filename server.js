@@ -1,10 +1,25 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const morgan = require('morgan');
 const db = require('./database');
 
 const app = express();
 const port = 3000;
+
+// Configure Morgan for logging
+morgan.token('temperature', (req) => {
+    if (req.path.startsWith('/temperature')) {
+        return `location: ${req.params.location}, temp: ${req.query.temp}`;
+    }
+    return '';
+});
+
+// Custom format for temperature endpoint logging
+const temperatureFormat = ':date[iso] :method :url :status :response-time ms :temperature';
+
+// Use Morgan only for temperature endpoints
+app.use('/temperature', morgan(temperatureFormat));
 
 app.use(cors());
 app.use(express.json());
@@ -12,10 +27,7 @@ app.use(express.static('public'));
 
 // Validation function for temperature
 function isValidTemperature(temp) {
-    // Convert to number and check if it's a valid temperature
     const number = parseFloat(temp);
-    
-    // Check if it's a valid number and within reasonable range (-100°C to 100°C)
     return !isNaN(number) && 
            Number.isFinite(number) && 
            number >= -100 && 
@@ -24,8 +36,6 @@ function isValidTemperature(temp) {
 
 // Validation function for location
 function isValidLocation(location) {
-    // Only allow alphanumeric characters, dashes, and underscores
-    // Length between 2 and 50 characters
     const locationRegex = /^[a-zA-Z0-9-_]{2,50}$/;
     return locationRegex.test(location);
 }
@@ -55,7 +65,6 @@ app.get('/temperature/:location', (req, res) => {
         });
     }
 
-    // Convert to number for storage
     const parsedTemperature = parseFloat(temperature);
 
     const stmt = db.prepare('INSERT INTO temperatures (location, temperature) VALUES (?, ?)');
