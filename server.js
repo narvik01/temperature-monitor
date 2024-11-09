@@ -11,17 +11,18 @@ const port = 3000;
 // Configure Morgan for logging
 morgan.token('temperature', (req) => {
     if (req.path.startsWith('/temperature')) {
+        const headers = JSON.stringify(req.headers, null, 2);
         if (req.method === 'GET') {
-            return `location: ${req.params.location}, temp: ${req.query.temp}`;
+            return `\nHeaders: ${headers}\nlocation: ${req.params.location}, temp: ${req.query.temp}`;
         } else if (req.method === 'POST') {
-            return `temp: ${req.query.temp}, body: ${req.body}`;
+            return `\nHeaders: ${headers}\ntemp: ${req.query.temp}, body: ${req.body}`;
         }
     }
     return '';
 });
 
 // Custom format for temperature endpoint logging
-const temperatureFormat = ':date[iso] :method :url :status :response-time ms :temperature';
+const temperatureFormat = '\n=== Request ===\n:date[iso] :method :url :status :response-time ms :temperature\n==============\n';
 
 // Use Morgan only for temperature endpoints
 app.use('/temperature', morgan(temperatureFormat));
