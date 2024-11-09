@@ -45,7 +45,7 @@ function isValidLocation(location) {
 }
 
 // POST endpoint that logs and responds OK
-app.post('/temperature/:location', bodyParser.text({type: '*/*'}), (req, res) => {
+app.post('/temperature/:location', (req, res) => {
     const location = req.params.location;
     const temperature = req.query.temp;
     
