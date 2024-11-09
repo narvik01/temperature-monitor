@@ -44,10 +44,18 @@ function isValidLocation(location) {
     return locationRegex.test(location);
 }
 
-// New POST endpoint that just logs and responds OK
-app.post('/temperature', (req, res) => {
+// POST endpoint that logs and responds OK
+app.post('/temperature/:location', (req, res) => {
+    const location = req.params.location;
     const temperature = req.query.temp;
     
+    // Validate location
+    if (!isValidLocation(location)) {
+        return res.status(400).json({ 
+            error: 'Invalid location format. Use only letters, numbers, dashes, and underscores (2-50 characters).' 
+        });
+    }
+
     // Validate temperature
     if (!temperature) {
         return res.status(400).json({ 
@@ -64,6 +72,7 @@ app.post('/temperature', (req, res) => {
     res.json({ 
         success: true, 
         message: 'Temperature logged',
+        location,
         temperature: parseFloat(temperature)
     });
 });
