@@ -81,6 +81,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s;
+            opacity: 0;  /* Hide by default */
         }
         
         .delete-btn:hover {
@@ -91,6 +92,16 @@
         .actions-cell {
             width: 80px;
             text-align: center;
+        }
+
+        /* Show delete button on row hover */
+        .table tbody tr:hover .delete-btn {
+            opacity: 1;
+        }
+
+        /* Ensure smooth transition */
+        .table tbody tr .delete-btn {
+            transition: opacity 0.2s ease-in-out;
         }
     </style>
 </head>
