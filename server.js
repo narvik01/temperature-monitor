@@ -13,9 +13,9 @@ morgan.token('temperature', (req) => {
     if (req.path.startsWith('/temperature')) {
         const headers = JSON.stringify(req.headers, null, 2);
         if (req.method === 'GET') {
-            return `\nHeaders: ${headers}\nlocation: ${req.params.location}, temp: ${req.query.temp}`;
+            return `\nHeaders: ${headers}\n`;
         } else if (req.method === 'POST') {
-            return `\nHeaders: ${headers}\ntemp: ${req.query.temp}, body: ${req.body}`;
+            return `\nHeaders: ${headers}\n body: ${req.body}`;
         }
     }
     return '';
